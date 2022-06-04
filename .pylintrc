@@ -1,0 +1,22 @@
+[FORMAT]
+
+max-line-length=240
+
+# Good variable names which should always be accepted, separated by a comma
+good-names=i,j,n,e
+
+[MASTER]
+
+disable=
+#    C0114, # missing-module-docstring
+#    C0116, # missing-function-docstring
+
+[EXCEPTIONS]
+
+# Exceptions that will emit a warning when being caught. Defaults to
+# "Exception"
+overgeneral-exceptions=BaseException
+
+[MISCELLANEOUS]
+
+notes=

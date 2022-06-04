@@ -1,0 +1,14 @@
+token.txt
+*.log
+*.pickle
+*.db
+temp
+.mypy_cache/
+*.pyc
+*.json
+*.exe
+tests*
+musor*
+db.sqlite3
+.pytest_cache/
+bot_db.sqlite3
