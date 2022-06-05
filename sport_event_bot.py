@@ -12,8 +12,8 @@ Then create token.txt file in project folder and stat this main file.
 Based on python-telegram-bot v13.xx (multithreaded).
 May be it will be rewrited to python-telegram-bot v20.0 with asyncio in future.
 
-TODO: priority list of participants, bot name (any) removing from command
-TODO: clean up litte mess after adding translation with 'gettext()'
+TODO: priority list of participants?, bot name (any) removing from command
+TODO: /add /remove with event without description
 """
 
 import sys
@@ -29,29 +29,10 @@ from recurrent.event_parser import RecurringEvent
 import db
 
 
-
 def _(text) -> int:
     """Keep text in English"""
     return text
 
-# Library 'python-telegram-bot' v13.xx is multithreaded.
-# This is not thread-safe wraps. There is a little possibility that some new user message
-# will be arrived just in the middle of processing another message in a different thread
-# and the LANG will be wrong for that user (if LANGs are different).
-# So, this wrapper can be replaced by func-space commands like this:
-
-# lang = update.message.from_user.language_code
-# if lang == "ru":
-#     _ = lang_ru.gettext
-# else:
-#     def _(text):
-#         return text
-# inside every fuction
-# But I want to left this as is for now. :)
-
-# lang_ua = gettext.translation('ua', localedir='locale', languages=['au'])  # locale\ua\LC_MESSAGES\ua.mo
-# lang_pt = gettext.translation('pt', localedir='locale', languages=['pt'])  # locale\pt\LC_MESSAGES\pt.mo
-# lang_ru = gettext.translation('ru', localedir='locale', languages=['ru'])  # locale\ru\LC_MESSAGES\ru.mo
 
 TRANSLATIONS = {
     'uk': gettext.translation('ua', localedir='locale', languages=['ua']).gettext,
@@ -138,7 +119,7 @@ def button(update, context):
 
 @logger.catch
 def parse_datetime(str_datetime_in_free_form: str) -> Optional[datetime.datetime]:
-    """Parse text for DATETIME in frree form with RECURRENT library. """
+    """Parse text for DATETIME in free form with RECURRENT library. """
     try:
         consts = parsedatetime.Constants(localeID=_('en_US'), usePyICU=False)
         consts.use24 = True
@@ -150,10 +131,10 @@ def parse_datetime(str_datetime_in_free_form: str) -> Optional[datetime.datetime
         # logger.debug(f"found date: {found_date}")
         # Drop any suspicious results
         delta = found_date - datetime.datetime.now()
-        if delta.days < 0:  # примерное число -- вряд ли кто-то назначает футбол за столько дней ДО
+        if delta.days < 0:
             logger.info(f"Time DELTA.days < 0 !!!  {delta.days}. ??? skipping...")
             return None
-        if delta.days > 31:  # примерное число -- вряд ли кто-то назначает футбол за столько дней ДО
+        if delta.days > 31:
             logger.info(f"Time DELTA.days = {delta.days}. Suspicious, skipping...")
             return None
         logger.info(f"Delta: {delta.days}, {delta.seconds}")
@@ -248,7 +229,7 @@ def set_players_limit(update, context):
 
 @logger.catch
 def create_event_full_text(this_chat_id: int):
-    """Compose full text for telegram message for the event. Using LANG from chat_id (set by event creater)"""
+    """Compose full text for telegram message for the event. Using LANG from chat_id (set by event creator)"""
 
     lang = db.get_chat_lang(this_chat_id)
     if lang in TRANSLATIONS.keys():
@@ -342,7 +323,7 @@ def show_info(update, context):
         update.message.reply_text(_('No events'))
         return
     event_text = create_event_full_text(this_chat_id)
-    # удаление кнопок из последнего сообщения
+    # removing buttons from latest bot message
     try:
         latest_bot_message_id = db.get_latest_bot_message_id(this_chat_id)
         if latest_bot_message_id:
@@ -525,11 +506,13 @@ def build_menu(buttons, n_cols, header_buttons=None, footer_buttons=None):
 # ____________________________________________________________________________________________________________________
 # ____________________________________________________________________________________________________________________
 # ____________________________________________________________________________________________________________________
+
+
 if __name__ == '__main__':
 
     logger.remove()
-    logger.add("logs/logs.log", level="DEBUG")
-    logger.add(sys.stderr, level="DEBUG")
+    logger.add("logs/logs.log", level="INFO")
+    logger.add(sys.stderr, level="WARNING")
 
     try:
         with open('token.txt', encoding='utf-8') as f:
@@ -562,3 +545,19 @@ if __name__ == '__main__':
     updater.start_polling()
     logger.info("Telegram Futsal Bot is waiting for commands...")
     updater.idle()
+
+
+# Library 'python-telegram-bot' v13.xx is multithreaded.
+# This is not thread-safe wraps. There is a little possibility that some new user message
+# will be arrived just in the middle of processing another message in a different thread
+# and the LANG will be wrong for that user (if LANGs are different).
+# So, this wrapper can be replaced by func-space commands like this:
+
+# lang = update.message.from_user.language_code
+# if lang == "ru":
+#     _ = lang_ru.gettext
+# else:
+#     def _(text):
+#         return text
+# inside every fuction
+# But I want to left this as is for now. :)
