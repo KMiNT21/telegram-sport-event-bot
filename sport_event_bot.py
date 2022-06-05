@@ -559,5 +559,5 @@ if __name__ == '__main__':
 # else:
 #     def _(text):
 #         return text
-# inside every fuction
+# inside every function
 # But I want to left this as is for now. :)
