@@ -14,6 +14,10 @@ You can set the date and time later with a separate command: **/event_datetime d
 
 Then the **/stat** command will display data on group members. Specifically, the number of registrations for events and the number of penalty points. Penalty points can be assigned to users with the **/penalty USERID** command, for example, for missing events without canceling the application in a timely manner. Used only to mark the most irresponsible users. If the application/penalty ratio is poor, a yellow card (one, two or three) will be displayed next to the username.
 
+In addition to English, Ukrainian, Russian and Portuguese languages are also supported.
+
+You can just use this bot on my server (it's available for now by telegram name [@zp_futsal_bot](https://telegram.me/zp_futsal_bot)). Just invite bot to your grup. Or install your bot version on your server.
+
 ## Installation
 
 First of all you need Python 3.6+. Then follow these steps:
