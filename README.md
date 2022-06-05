@@ -20,7 +20,7 @@ You can just use this bot on my server (it's available for now by telegram name 
 
 ## Installation
 
-First of all you need Python 3.6+. Then follow these steps:
+First of all you need Python 3.7+. Then follow these steps:
 
 1. Clone the repo
 
@@ -43,8 +43,8 @@ First of all you need Python 3.6+. Then follow these steps:
    python db.py
    ```
 
-5. Run 'python  sport_event_bot.py'.
+5. Run 'python sport_event_bot.py'.
 
     ```sh
-   python  sport_event_bot.py
+   python sport_event_bot.py
    ```
