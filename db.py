@@ -389,7 +389,7 @@ def set_chat_lang(chat_id: int, lang: str):
 def get_event_users(chat_id: int) -> List[int]:
     conn = reconnect()
     cur = conn.cursor()
-    cur.execute('SELECT user_id FROM Participants WHERE event_id IN (SELECT event_id FROM Events WHERE status = "Open" AND  chat_id=?);', (chat_id,))
+    cur.execute('SELECT user_id FROM Participants WHERE event_id IN (SELECT event_id FROM Events WHERE status = "Open" AND  chat_id=?) ORDER BY operation_datetime;', (chat_id,))
     rows = cur.fetchall()
     conn.close()
     if not rows:
@@ -400,7 +400,7 @@ def get_event_users(chat_id: int) -> List[int]:
 def get_event_revoked_users(chat_id: int) -> List[int]:
     conn = reconnect()
     cur = conn.cursor()
-    cur.execute('SELECT user_id FROM Revoked WHERE event_id IN (SELECT event_id FROM Events WHERE status = "Open" AND  chat_id=?);', (chat_id,))
+    cur.execute('SELECT user_id FROM Revoked WHERE event_id IN (SELECT event_id FROM Events WHERE status = "Open" AND  chat_id=?) ORDER BY operation_datetime;', (chat_id,))
     rows = cur.fetchall()
     conn.close()
     if not rows:
