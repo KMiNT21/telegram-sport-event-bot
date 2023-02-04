@@ -21,6 +21,7 @@ from typing import Optional, Callable  #, Union, List, Set
 import gettext
 from functools import wraps
 import datetime
+import re
 from loguru import logger
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
@@ -184,12 +185,15 @@ def create_new_event(update, context):
     event_text = parse_cmd_arg(update, context)
     # this is our personal use-case, can be deleted or updated for real regex parsing LIMIT value (for fun?):
     txt = event_text.lower()
-    limit_markers = ['maximum', 'limit', 'максимум', 'максимальн', 'лимит', 'ограничени']
-    event_limit = 0
-    if any([marker in txt for marker in limit_markers]):
-        event_limit = 12  # 12 players by default
-        if "12" not in txt and "15" in txt:
-            event_limit = 15
+    limit_markers = ['maximum', 'max', 'limit', 'максимум', 'максимальн', 'макс', 'лимит', 'ограничени']
+    event_limit = 12
+    for marker in limit_markers:
+        if marker in txt:
+            try:
+                number = re.search(marker + r'[\s\S]*?(\d+)', txt).group(1)
+                event_limit = int(number)
+            except:
+                continue
     event_datetime = parse_datetime(event_text)
     message_text = _("New event created") + ":\n\n⚽️<b> " + event_text + " </b>⚽️"
     new_message = context.bot.send_message(this_chat_id, message_text, reply_markup=build_message_markup(update, context),  parse_mode=ParseMode.HTML)
