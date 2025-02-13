@@ -16,8 +16,6 @@ Then the **/stat** command will display data on group members. Specifically, the
 
 In addition to English, Ukrainian, Russian and Portuguese languages are also supported.
 
-You can just use this bot on my server (it's available for now by telegram name [@zp_futsal_bot](https://telegram.me/zp_futsal_bot)). Just invite bot to your group. Or install your bot version on your server.
-
 ## Installation
 
 First of all you need Python 3.7+. Then follow these steps:
