@@ -18,95 +18,95 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 "X-Generator: Poedit 3.0.1\n"
 
-#: sport_event_bot.py:99
+#: event_crafter_bot.py:99
 msgid "+ Apply for participation"
 msgstr "Подать заявку на участие"
 
-#: sport_event_bot.py:100
+#: event_crafter_bot.py:100
 msgid "- Revoke application"
 msgstr "Отозвать свою заявку"
 
-#: sport_event_bot.py:135
+#: event_crafter_bot.py:135
 msgid "en_US"
 msgstr "ru_RU"
 
-#: sport_event_bot.py:204
+#: event_crafter_bot.py:204
 msgid "New event created"
 msgstr "Новое событие было создано"
 
-#: sport_event_bot.py:262
+#: event_crafter_bot.py:262
 msgid "Played"
 msgstr "Сыграно"
 
-#: sport_event_bot.py:263
+#: event_crafter_bot.py:263
 msgid "from"
 msgstr "из"
 
-#: sport_event_bot.py:278
+#: event_crafter_bot.py:278
 msgid "Players limit"
 msgstr "Лимит игроков"
 
-#: sport_event_bot.py:283
+#: event_crafter_bot.py:283
 msgid "Event date and time"
 msgstr "Дата и время события"
 
-#: sport_event_bot.py:285
+#: event_crafter_bot.py:285
 msgid "Event time out"
 msgstr "Событие уже состоялось"
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "Time left"
 msgstr "До события осталось"
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "and"
 msgstr "и"
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "days"
 msgstr "дней"
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "hours"
 msgstr "часов"
 
-#: sport_event_bot.py:290
+#: event_crafter_bot.py:290
 msgid "Players list"
 msgstr "Список игроков"
 
-#: sport_event_bot.py:298
+#: event_crafter_bot.py:298
 msgid "Reserve"
 msgstr "Резерв"
 
-#: sport_event_bot.py:311
+#: event_crafter_bot.py:311
 msgid "Revoked applications"
 msgstr "Отмененные заявки"
 
-#: sport_event_bot.py:318
+#: event_crafter_bot.py:318
 msgid "No applications yet"
 msgstr "Заявок пока нет"
 
-#: sport_event_bot.py:331
+#: event_crafter_bot.py:331
 msgid "No events"
 msgstr "Нет открытых событий"
 
-#: sport_event_bot.py:393
+#: event_crafter_bot.py:393
 msgid "No events to fix stat for"
 msgstr "Нет открытых событий для фиксации статистики"
 
-#: sport_event_bot.py:391
+#: event_crafter_bot.py:391
 msgid "Current statistics for this chat room members:"
 msgstr "Статистика участников этой группы:"
 
-#: sport_event_bot.py:427
+#: event_crafter_bot.py:427
 msgid "Players statistics for this group"
 msgstr "Статистика участников группы"
 
-#: sport_event_bot.py:428
+#: event_crafter_bot.py:428
 msgid "Registrations / Penalties"
 msgstr "Регистрации / Штрафы"
 
-#: sport_event_bot.py:445
+#: event_crafter_bot.py:445
 msgid ""
 "\n"
 "Available BOT commands:\n"

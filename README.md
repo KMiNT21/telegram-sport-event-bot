@@ -41,8 +41,8 @@ First of all you need Python 3.7+. Then follow these steps:
    python db.py
    ```
 
-5. Run 'python sport_event_bot.py'.
+5. Run 'python event_crafter_bot.py'.
 
     ```sh
-   python sport_event_bot.py
+   python event_crafter_bot.py
    ```

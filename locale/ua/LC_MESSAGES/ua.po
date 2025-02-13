@@ -18,88 +18,88 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 "X-Generator: Poedit 3.0.1\n"
 
-#: sport_event_bot.py:99
+#: event_crafter_bot.py:99
 msgid "+ Apply for participation"
 msgstr "Подати заявку на участь"
 
-#: sport_event_bot.py:100
+#: event_crafter_bot.py:100
 msgid "- Revoke application"
 msgstr "Відкликати свою заявку"
 
-#: sport_event_bot.py:135
+#: event_crafter_bot.py:135
 msgid "en_US"
 msgstr "ua_UA"
 
-#: sport_event_bot.py:204
+#: event_crafter_bot.py:204
 msgid "New event created"
 msgstr "Нова подія була створена"
 
-#: sport_event_bot.py:262
+#: event_crafter_bot.py:262
 msgid "Played"
 msgstr "Зіграно"
 
-#: sport_event_bot.py:263
+#: event_crafter_bot.py:263
 msgid "from"
 msgstr "з"
 
-#: sport_event_bot.py:278
+#: event_crafter_bot.py:278
 msgid "Players limit"
 msgstr "Ліміт гравців"
 
-#: sport_event_bot.py:283
+#: event_crafter_bot.py:283
 msgid "Event date and time"
 msgstr "Дата та час події"
 
-#: sport_event_bot.py:285
+#: event_crafter_bot.py:285
 msgid "Event time out"
 msgstr "Подія вже відбулася"
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "Time left"
 msgstr "До події залишилося"
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "and"
 msgstr "і"
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "days"
 msgstr "днів"
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "hours"
 msgstr "годин"
 
-#: sport_event_bot.py:290
+#: event_crafter_bot.py:290
 msgid "Players list"
 msgstr "Список гравців"
 
-#: sport_event_bot.py:298
+#: event_crafter_bot.py:298
 msgid "Reserve"
 msgstr "Резерв"
 
-#: sport_event_bot.py:311
+#: event_crafter_bot.py:311
 msgid "Revoked applications"
 msgstr "Скасовані заявки"
 
-#: sport_event_bot.py:318
+#: event_crafter_bot.py:318
 msgid "No applications yet"
 msgstr "Заявок поки що немає"
 
-#: sport_event_bot.py:331
+#: event_crafter_bot.py:331
 msgid "No events"
 msgstr "Немає відкритих подій"
 
 
-#: sport_event_bot.py:427
+#: event_crafter_bot.py:427
 msgid "Current statistics for this chat room members:"
 msgstr "Статистика учасників групи"
 
-#: sport_event_bot.py:428
+#: event_crafter_bot.py:428
 msgid "Registrations / Penalties"
 msgstr "Реєстрація / Штрафи"
 
-#: sport_event_bot.py:442
+#: event_crafter_bot.py:442
 msgid ""
 "\n"
 "Available BOT commands:\n"

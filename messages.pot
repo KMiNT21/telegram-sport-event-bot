@@ -15,95 +15,95 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: sport_event_bot.py:102
+#: event_crafter_bot.py:102
 msgid "+ Apply for participation"
 msgstr ""
 
-#: sport_event_bot.py:103
+#: event_crafter_bot.py:103
 msgid "- Revoke application"
 msgstr ""
 
-#: sport_event_bot.py:134
+#: event_crafter_bot.py:134
 msgid "en_US"
 msgstr ""
 
-#: sport_event_bot.py:204
+#: event_crafter_bot.py:204
 msgid "New event created"
 msgstr ""
 
-#: sport_event_bot.py:262
+#: event_crafter_bot.py:262
 msgid "Played"
 msgstr ""
 
-#: sport_event_bot.py:263
+#: event_crafter_bot.py:263
 msgid "from"
 msgstr ""
 
-#: sport_event_bot.py:278
+#: event_crafter_bot.py:278
 msgid "Players limit"
 msgstr ""
 
-#: sport_event_bot.py:283
+#: event_crafter_bot.py:283
 msgid "Event date and time"
 msgstr ""
 
-#: sport_event_bot.py:285
+#: event_crafter_bot.py:285
 msgid "Event time out"
 msgstr ""
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "Time left"
 msgstr ""
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "and"
 msgstr ""
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "days"
 msgstr ""
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "hours"
 msgstr ""
 
-#: sport_event_bot.py:290
+#: event_crafter_bot.py:290
 msgid "Players list"
 msgstr ""
 
-#: sport_event_bot.py:298
+#: event_crafter_bot.py:298
 msgid "Reserve"
 msgstr ""
 
-#: sport_event_bot.py:311
+#: event_crafter_bot.py:311
 msgid "Revoked applications"
 msgstr ""
 
-#: sport_event_bot.py:318
+#: event_crafter_bot.py:318
 msgid "There is no application for now"
 msgstr ""
 
-#: sport_event_bot.py:331
+#: event_crafter_bot.py:331
 msgid "No events"
 msgstr ""
 
-#: sport_event_bot.py:389
+#: event_crafter_bot.py:389
 msgid "No events to fix stat for"
 msgstr ""
 
-#: sport_event_bot.py:391
+#: event_crafter_bot.py:391
 msgid "Current statistics for this chat room members:"
 msgstr ""
 
-#: sport_event_bot.py:425
+#: event_crafter_bot.py:425
 msgid "Players statistics for this group"
 msgstr ""
 
-#: sport_event_bot.py:426
+#: event_crafter_bot.py:426
 msgid "Registrations / Penalties"
 msgstr ""
 
-#: sport_event_bot.py:442
+#: event_crafter_bot.py:442
 msgid ""
 "\n"
 "Available BOT commands:\n"

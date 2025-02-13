@@ -17,95 +17,95 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 "X-Generator: Poedit 3.0.1\n"
 
-#: sport_event_bot.py:102
+#: event_crafter_bot.py:102
 msgid "+ Apply for participation"
 msgstr "+ Inscreva-se para participar"
 
-#: sport_event_bot.py:103
+#: event_crafter_bot.py:103
 msgid "- Revoke application"
 msgstr "- Revogar pedido"
 
-#: sport_event_bot.py:134
+#: event_crafter_bot.py:134
 msgid "en_US"
 msgstr "pt_BR"
 
-#: sport_event_bot.py:204
+#: event_crafter_bot.py:204
 msgid "New event created"
 msgstr "Novo evento criado"
 
-#: sport_event_bot.py:262
+#: event_crafter_bot.py:262
 msgid "Played"
 msgstr "Jogados"
 
-#: sport_event_bot.py:263
+#: event_crafter_bot.py:263
 msgid "from"
 msgstr "de"
 
-#: sport_event_bot.py:278
+#: event_crafter_bot.py:278
 msgid "Players limit"
 msgstr "Limite de jogadores"
 
-#: sport_event_bot.py:283
+#: event_crafter_bot.py:283
 msgid "Event date and time"
 msgstr "Data e hora do evento"
 
-#: sport_event_bot.py:285
+#: event_crafter_bot.py:285
 msgid "Event time out"
 msgstr "Tempo limite do evento"
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "Time left"
 msgstr "Tempo restante"
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "and"
 msgstr "e"
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "days"
 msgstr "dias"
 
-#: sport_event_bot.py:288
+#: event_crafter_bot.py:288
 msgid "hours"
 msgstr "horas"
 
-#: sport_event_bot.py:290
+#: event_crafter_bot.py:290
 msgid "Players list"
 msgstr "Lista de jogadores"
 
-#: sport_event_bot.py:298
+#: event_crafter_bot.py:298
 msgid "Reserve"
 msgstr "Reserva"
 
-#: sport_event_bot.py:311
+#: event_crafter_bot.py:311
 msgid "Revoked applications"
 msgstr "Aplicativos retirados"
 
-#: sport_event_bot.py:318
+#: event_crafter_bot.py:318
 msgid "No applications yet"
 msgstr "Ainda não há aplicativos"
 
-#: sport_event_bot.py:331
+#: event_crafter_bot.py:331
 msgid "No events"
 msgstr "Sem eventos"
 
-#: sport_event_bot.py:389
+#: event_crafter_bot.py:389
 msgid "No events to fix stat for"
 msgstr "Nenhum evento para corrigir a estatística"
 
-#: sport_event_bot.py:391
+#: event_crafter_bot.py:391
 msgid "Current statistics for this chat room members:"
 msgstr "Estatísticas atuais para os membros desta sala de chat:"
 
-#: sport_event_bot.py:425
+#: event_crafter_bot.py:425
 msgid "Players statistics for this group"
 msgstr "Estatísticas de jogadores para este grupo"
 
-#: sport_event_bot.py:426
+#: event_crafter_bot.py:426
 msgid "Registrations / Penalties"
 msgstr "Inscrições / Penalidades"
 
-#: sport_event_bot.py:442
+#: event_crafter_bot.py:442
 msgid ""
 "\n"
 "Available BOT commands:\n"
