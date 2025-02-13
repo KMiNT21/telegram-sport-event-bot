@@ -23,7 +23,7 @@ First of all you need Python 3.7+. Then follow these steps:
 1. Clone the repo
 
    ```sh
-   git clone https://github.com/KMiNT21/telegram_sport_event_bot.git
+   git clone https://github.com/ssvasilev/EventCrafterbot.git
 
    ```
 
