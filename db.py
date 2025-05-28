@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""This module works with sqlite3 database wtih 3 tables: Users, Chats, Events
+"""This module works with sqlite3 database with 3 tables: Users, Chats, Events
 """
 
 import sys
@@ -19,8 +19,11 @@ logger.add(sys.stderr, level="DEBUG")
 
 @logger.catch
 def reconnect():
-    # return sqlite3.connect(DB_FILENAME, check_same_thread = False)
-    return sqlite3.connect(DB_FILENAME)
+    # return sqlite3.connect(DB_FILENAME, check_same_thread = False, isolation_level=None)
+    conn = sqlite3.connect(DB_FILENAME)
+    # Enable foreign key constraints
+    conn.execute('PRAGMA foreign_keys = ON;')
+    return conn
 
 
 def create_table_users():
@@ -120,368 +123,668 @@ def create_table_chat_penalties():
 
 @logger.catch
 def close_all_open_events_for_chat(chat_id: int):
+    """Close all open events for a chat with proper SQL parameterization"""
+    if not isinstance(chat_id, int):
+        raise ValueError("chat_id must be an integer")
+        
     conn = reconnect()
-    conn.execute('''UPDATE Events SET status = "Closed" WHERE chat_id = ? AND status = "Open";''', (chat_id, ))
-    conn.commit()
-    conn.close()
+    try:
+        with conn:
+            conn.execute('''UPDATE Events SET status = 'Closed' WHERE chat_id = ? AND status = 'Open';''', (chat_id,))
+    except sqlite3.Error as e:
+        logger.error(f"Error in close_all_open_events_for_chat: {e}")
+        raise
+    finally:
+        conn.close()
 
 
-def event_add(chat_id: int, text: str, dtm: datetime.datetime, players_limit: int, latest_bot_message_id:int, latest_bot_message_text:str):
+def event_add(chat_id: int, text: str, dtm: datetime.datetime, players_limit: int, latest_bot_message_id: int, latest_bot_message_text: str):
+    """Add a new event with proper SQL parameterization"""
+    if not isinstance(chat_id, int) or not isinstance(players_limit, int) or not isinstance(latest_bot_message_id, int):
+        raise ValueError("Invalid parameter types")
+        
     event_datetime = str(dtm) if dtm else ''
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute("PRAGMA foreign_keys = 1;")
-    cur.execute('''INSERT into Events (chat_id, description, datetime, players_limit)
-    values (?, ?, ?, ?);''',  (chat_id, text, event_datetime, players_limit))
-    conn.execute('''UPDATE Chats SET
-    latest_event_id = ?, latest_bot_message_id = ?, latest_bot_message_text = ?  WHERE chat_id = ?;''',
-    (cur.lastrowid, latest_bot_message_id, latest_bot_message_text, chat_id,))
-    conn.commit()
-    conn.close()
+    try:
+        with conn:
+            cur = conn.cursor()
+            # Insert new event
+            cur.execute('''
+                INSERT INTO Events (chat_id, description, datetime, players_limit)
+                VALUES (?, ?, ?, ?);
+            ''', (chat_id, text, event_datetime, players_limit))
+            
+            # Update chat info
+            conn.execute('''
+                UPDATE Chats 
+                SET latest_event_id = ?, 
+                    latest_bot_message_id = ?, 
+                    latest_bot_message_text = ?
+                WHERE chat_id = ?;
+            ''', (cur.lastrowid, latest_bot_message_id, latest_bot_message_text, chat_id))
+    except sqlite3.Error as e:
+        logger.error(f"Error in event_add: {e}")
+        raise
+    finally:
+        conn.close()
 
 
 
 @logger.catch
 def update_event_text(chat_id, new_text):
+    """Update event text with proper SQL parameterization"""
+    if not isinstance(chat_id, int) or not isinstance(new_text, str):
+        raise ValueError("Invalid parameter types")
+        
     conn = reconnect()
-    conn.execute('''UPDATE Events SET description = ?  WHERE status = "Open" AND chat_id = ? ;''', (new_text, chat_id, ))
-    conn.commit()
-    conn.close()
+    try:
+        with conn:
+            conn.execute('''
+                UPDATE Events 
+                SET description = ?
+                WHERE status = 'Open' AND chat_id = ?;
+            ''', (new_text, chat_id))
+    except sqlite3.Error as e:
+        logger.error(f"Error in update_event_text: {e}")
+        raise
+    finally:
+        conn.close()
 
 
 @logger.catch
-def get_event_text(chat_id) -> str:
+def get_event_text(chat_id: int) -> str:
+    """Get event text with proper SQL parameterization"""
+    if not isinstance(chat_id, int):
+        raise ValueError("chat_id must be an integer")
+        
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute('''SELECT description FROM Events WHERE STATUS="Open" AND chat_id = ? ;''', (chat_id, ))
-    row = cur.fetchone()
-    conn.close()
-    if not row:
-        logger.info("get_event_text -> No events!")
+    try:
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT description 
+            FROM Events 
+            WHERE STATUS = 'Open' AND chat_id = ?;
+        ''', (chat_id,))
+        row = cur.fetchone()
+        return row[0] if row else ''
+    except sqlite3.Error as e:
+        logger.error(f"Error in get_event_text: {e}")
         return ''
-    return row[0]
+    finally:
+        conn.close()
 
 
 @logger.catch
-def set_players_limit(chat_id, players_limit: int):
+def set_players_limit(chat_id: int, players_limit: int):
+    """Set players limit with proper SQL parameterization"""
+    if not isinstance(chat_id, int) or not isinstance(players_limit, int):
+        raise ValueError("chat_id and players_limit must be integers")
+        
     conn = reconnect()
-    conn.execute('''UPDATE Events SET players_limit = ?  WHERE status = "Open" AND chat_id = ? ;''', (players_limit, chat_id, ))
-    conn.commit()
-    conn.close()
+    try:
+        with conn:
+            conn.execute('''
+                UPDATE Events 
+                SET players_limit = ?
+                WHERE status = 'Open' AND chat_id = ?;
+            ''', (players_limit, chat_id))
+    except sqlite3.Error as e:
+        logger.error(f"Error in set_players_limit: {e}")
+        raise
+    finally:
+        conn.close()
 
 
 
 @logger.catch
-def get_event_limit(chat_id) -> int:
+def get_event_limit(chat_id: int) -> int:
+    """Get event player limit with proper SQL parameterization"""
+    if not isinstance(chat_id, int):
+        raise ValueError("chat_id must be an integer")
+        
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute('''SELECT players_limit FROM Events WHERE status="Open" AND chat_id = ? ;''', (chat_id, ))
-    row = cur.fetchone()
-    conn.close()
-    if not row:
-        logger.warning("get_event_limit -> No events!")
+    try:
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT players_limit 
+            FROM Events 
+            WHERE status = 'Open' AND chat_id = ?;
+        ''', (chat_id,))
+        row = cur.fetchone()
+        return int(row[0]) if row and row[0] is not None else 0
+    except (ValueError, sqlite3.Error) as e:
+        logger.error(f"Error in get_event_limit: {e}")
         return 0
-    elif not row[0]:
-        return 0
-    else:
-        return int(row[0])
+    finally:
+        conn.close()
 
 
 @logger.catch
 def set_event_datetime(chat_id: int, dtm: datetime.datetime):
+    """Set event datetime with proper SQL parameterization"""
+    if not isinstance(chat_id, int) or not isinstance(dtm, datetime.datetime):
+        raise ValueError("Invalid parameter types")
+        
     conn = reconnect()
-    conn.execute('''UPDATE Events SET datetime = ?  WHERE status = "Open" AND chat_id = ? ;''', (dtm, chat_id, ))
-    conn.commit()
-    conn.close()
+    try:
+        with conn:
+            conn.execute('''
+                UPDATE Events 
+                SET datetime = ?
+                WHERE status = 'Open' AND chat_id = ?;
+            ''', (dtm, chat_id))
+    except sqlite3.Error as e:
+        logger.error(f"Error in set_event_datetime: {e}")
+        raise
+    finally:
+        conn.close()
 
 
 @logger.catch
 def get_event_datetime(chat_id: int) -> str:
+    """Get event datetime with proper SQL parameterization"""
+    if not isinstance(chat_id, int):
+        raise ValueError("chat_id must be an integer")
+        
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute('''SELECT datetime FROM Events WHERE status="Open" AND chat_id = ? ;''', (chat_id, ))
-    row = cur.fetchone()
-    conn.close()
-    if not row:
-        logger.warning("get_event_datetime -> No events!")
+    try:
+        cur = conn.cursor()
+        cur.execute('''SELECT datetime FROM Events WHERE status="Open" AND chat_id = ? ;''', (chat_id,))
+        row = cur.fetchone()
+        return row[0] if row and row[0] else ''
+    except sqlite3.Error as e:
+        logger.error(f"Error in get_event_datetime: {e}")
         return ''
-    return row[0]
+    finally:
+        conn.close()
 
 
 @logger.catch
-def fix_event(chat_id):
+def fix_event(chat_id: int):
+    """Close all open events for a chat with proper SQL parameterization"""
+    if not isinstance(chat_id, int):
+        raise ValueError("chat_id must be an integer")
+        
     conn = reconnect()
-    conn.execute('''UPDATE Events SET status = "Fixed"  WHERE status = "Open" AND chat_id = ? ;''', (chat_id, ))
-    conn.commit()
-    conn.close()
+    try:
+        with conn:
+            conn.execute('''UPDATE Events SET status = 'Fixed' WHERE status = 'Open' AND chat_id = ? ;''', (chat_id,))
+    except sqlite3.Error as e:
+        logger.error(f"Error in fix_event: {e}")
+        raise
+    finally:
+        conn.close()
 
 
 @logger.catch
-def get_latest_bot_message_id(chat_id) -> int:
+def get_latest_bot_message_id(chat_id: int) -> int:
+    """Get latest bot message ID with proper SQL parameterization"""
+    if not isinstance(chat_id, int):
+        raise ValueError("chat_id must be an integer")
+        
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute('''SELECT latest_bot_message_id FROM Chats WHERE chat_id = ? ;''', (chat_id, ))
-    row = cur.fetchone()
-    conn.close()
-    if not row:
-        logger.debug("get_latest_bot_message_id -> No previous messages to edit")
+    try:
+        cur = conn.cursor()
+        cur.execute('''SELECT latest_bot_message_id FROM Chats WHERE chat_id = ? ;''', (chat_id,))
+        row = cur.fetchone()
+        return int(row[0]) if row and row[0] is not None else 0
+    except (ValueError, sqlite3.Error) as e:
+        logger.error(f"Error in get_latest_bot_message_id: {e}")
         return 0
-    else:
-        return int(row[0])
+    finally:
+        conn.close()
 
 
 @logger.catch
-def get_latest_bot_message_text(chat_id) -> str:
+def get_latest_bot_message_text(chat_id: int) -> str:
+    """Get latest bot message text with proper SQL parameterization"""
+    if not isinstance(chat_id, int):
+        raise ValueError("chat_id must be an integer")
+        
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute('''SELECT latest_bot_message_text FROM Chats WHERE chat_id = ? ;''', (chat_id, ))
-    row = cur.fetchone()
-    conn.close()
-    if not row:
-        logger.warning("get_latest_bot_message_text: No events!")
-        return ""
-    else:
-        return row[0]
+    try:
+        cur = conn.cursor()
+        cur.execute('''SELECT latest_bot_message_text FROM Chats WHERE chat_id = ? ;''', (chat_id,))
+        row = cur.fetchone()
+        return row[0] if row and row[0] else ''
+    except sqlite3.Error as e:
+        logger.error(f"Error in get_latest_bot_message_text: {e}")
+        return ''
+    finally:
+        conn.close()
 
 
 @logger.catch
-def save_latest_bot_message(chat_id, message_id, message_text):
+def save_latest_bot_message(chat_id: int, message_id: int, message_text: str):
+    """Save latest bot message with proper SQL parameterization"""
+    if not all(isinstance(x, int) for x in (chat_id, message_id)) or not isinstance(message_text, str):
+        raise ValueError("Invalid parameter types")
+        
     conn = reconnect()
-    conn.execute('''UPDATE Chats SET latest_bot_message_id = ? , latest_bot_message_text = ?  WHERE chat_id = ? ;''', (message_id, message_text, chat_id, ))
-    conn.commit()
-    conn.close()
+    try:
+        with conn:
+            conn.execute('''UPDATE Chats SET latest_bot_message_id = ?, latest_bot_message_text = ? WHERE chat_id = ?;''', (message_id, message_text, chat_id))
+    except sqlite3.Error as e:
+        logger.error(f"Error in save_latest_bot_message: {e}")
+        raise
+    finally:
+        conn.close()
 
 
 @logger.catch
-def add_or_update_user(user_id, first_name="", last_name="", username=""):
-    # logger.debug(f'add_or_update_user()...{user_record}')
-    if first_name is None:
-        first_name = ""
-    if last_name is None:
-        last_name = ""
-    if username is None:
-        username = ""
-    user_record = (user_id, first_name, last_name, username)
-    conn = reconnect()
-    cur = conn.cursor()
-    cur.execute('SELECT FIRST_NAME, LAST_NAME, USERNAME FROM Users WHERE user_id = ?;', (user_id,))
-    row = cur.fetchone()
-    if not row:
-        logger.debug('Adding NEW user record')
-        conn.execute('INSERT into Users(user_id, first_name, last_name, username) values (?, ?, ?, ?)', user_record)
-        conn.commit()
-    elif row != (first_name, last_name, username):
-        logger.debug('Updating user record')
-        conn.execute('UPDATE Users SET first_name = ?, last_name = ?, username = ? WHERE user_id = ?;', user_record)
-        conn.commit()
-    else:
-        logger.debug('    no new data')
-    conn.close()
+def add_or_update_user(user_id: int, first_name: str = "", last_name: str = "", username: str = "") -> None:
+    """Adds or updates user data in the database.
+    
+    Args:
+        user_id: User's Telegram ID
+        first_name: User's first name
+        last_name: User's last name
+        username: User's Telegram username (without @)
+    """
+    # Input validation
+    if not isinstance(user_id, int) or user_id <= 0:
+        raise ValueError("user_id must be a positive integer")
+    if not all(isinstance(x, str) for x in (first_name, last_name, username)):
+        raise TypeError("first_name, last_name and username must be strings")
+    
+    # Clean input data
+    first_name = first_name or ""
+    last_name = last_name or ""
+    username = username or ""
+    
+    conn = None
+    try:
+        conn = reconnect()
+        with conn:
+            # Check if user exists
+            cur = conn.cursor()
+            cur.execute('''
+                SELECT first_name, last_name, username 
+                FROM Users 
+                WHERE user_id = ?;
+            ''', (user_id,))
+            row = cur.fetchone()
+            
+            if row is None:
+                # Add new user
+                logger.debug(f'Adding new user: {user_id}')
+                conn.execute('''
+                    INSERT INTO Users(user_id, first_name, last_name, username) 
+                    VALUES (?, ?, ?, ?);
+                ''', (user_id, first_name, last_name, username))
+            else:
+                # Update existing user if data has changed
+                current_first, current_last, current_username = row
+                if (first_name, last_name, username) != (current_first, current_last, current_username):
+                    logger.debug(f'Updating user data: {user_id}')
+                    conn.execute('''
+                        UPDATE Users 
+                        SET first_name = ?, last_name = ?, username = ? 
+                        WHERE user_id = ?;
+                    ''', (first_name, last_name, username, user_id))
+                else:
+                    logger.debug(f'User {user_id} data has not changed')
+                    
+    except sqlite3.Error as e:
+        logger.error(f"Database error while updating user {user_id}: {e}")
+        raise
+    finally:
+        if conn:
+            conn.close()
 
 
 @logger.catch
 def compose_full_name(user_id: int) -> str:
+    """Compose user's full name with proper SQL parameterization"""
+    if not isinstance(user_id, int):
+        raise ValueError("user_id must be an integer")
+        
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute(f'''SELECT first_name, last_name, username FROM users WHERE user_id = {user_id};''')
-    row = cur.fetchone()
-    conn.close()
-    if not row:
-        return 'USER_ID NOT FOUND!'
-    fnm = row[0] if row[0] else ''
-    lnm = row[1] if row[1] else ''
-    unm = row[2] if row[2] else ''
-    res = " ".join([fnm, lnm])
-    res = " ".join(res.split())
-    if res and unm:
-        res = f"{res} ({unm})"
-    if not res and unm:
-        res = unm
-    if not res:
+    try:
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT first_name, last_name, username 
+            FROM users 
+            WHERE user_id = ?;
+        ''', (user_id,))
+        row = cur.fetchone()
+        if not row:
+            return 'USER_ID NOT FOUND!'
+            
+        fnm = row[0] if row[0] else ''
+        lnm = row[1] if row[1] else ''
+        unm = row[2] if row[2] else ''
+        
+        res = " ".join([fnm, lnm]).strip()
+        if res and unm:
+            res = f"{res} ({unm})"
+        elif not res and unm:
+            res = unm
+            
+        return res if res else str(user_id)
+    except sqlite3.Error as e:
+        logger.error(f"Error in compose_full_name: {e}")
         return str(user_id)
-    return res
+    finally:
+        conn.close()
 
 
-def penalty_for_user_in_chat(chat_id, user_id, operator_id: int):
+def penalty_for_user_in_chat(chat_id: int, user_id: int, operator_id: int):
+    """Add penalty for user in chat with proper SQL parameterization"""
+    if not all(isinstance(x, int) for x in (chat_id, user_id, operator_id)):
+        raise ValueError("All IDs must be integers")
+        
     conn = reconnect()
-    dtm = datetime.datetime.now()
-    conn.execute('''INSERT INTO Penalties(chat_id, user_id, operation_datetime, operator_id) VALUES (?, ?, ?, ?);''',
-    (chat_id, user_id, dtm, operator_id))
-    conn.commit()
-    conn.close()
+    try:
+        with conn:
+            conn.execute('''
+                INSERT INTO Penalties(chat_id, user_id, operation_datetime, operator_id) 
+                VALUES (?, ?, ?, ?);
+            ''', (chat_id, user_id, datetime.datetime.now(), operator_id))
+    except sqlite3.Error as e:
+        logger.error(f"Error in penalty_for_user_in_chat: {e}")
+        raise
+    finally:
+        conn.close()
 
 
 @logger.catch
 def get_all_userids() -> List[int]:
+    """Get all user IDs with proper error handling"""
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute('''SELECT user_id FROM Users;''')
-    all_rows = cur.fetchall()
-    conn.close()
-    all_ids = []
-    for row in all_rows:
-        all_ids.append(int(row[0]))
-    return all_ids
+    try:
+        cur = conn.cursor()
+        cur.execute('''SELECT user_id FROM Users;''')
+        return [int(row[0]) for row in cur.fetchall() if row and row[0] is not None]
+    except (ValueError, sqlite3.Error) as e:
+        logger.error(f"Error in get_all_userids: {e}")
+        return []
+    finally:
+        conn.close()
 
 
 @logger.catch
 def get_all_chat_ids() -> Set[int]:
+    """Get all chat IDs with proper error handling"""
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute('''SELECT chat_id FROM Chats;''')
-    all_rows = cur.fetchall()
-    conn.close()
-    all_chat_ids = set()
-    for row in all_rows:
-        all_chat_ids.add(int(row[0]))
-    return all_chat_ids
+    try:
+        cur = conn.cursor()
+        cur.execute('''SELECT chat_id FROM Chats;''')
+        return {int(row[0]) for row in cur.fetchall() if row and row[0] is not None}
+    except (ValueError, sqlite3.Error) as e:
+        logger.error(f"Error in get_all_chat_ids: {e}")
+        return set()
+    finally:
+        conn.close()
 
 
 @logger.catch
 def register_new_chat_id(chat_id: int, lang: str):
-    language_code = lang if lang else  ''  # Telegram API language_code. Example: 'en'
+    """Register new chat ID with proper SQL parameterization"""
+    if not isinstance(chat_id, int):
+        raise ValueError("chat_id must be an integer")
+        
+    language_code = lang if lang else ''  # Telegram API language_code. Example: 'en'
     conn = reconnect()
-    conn.execute('INSERT into Chats(chat_id, lang) values (?, ?)', (chat_id, language_code))
-    conn.commit()
-    conn.close()
+    try:
+        with conn:
+            conn.execute('''
+                INSERT INTO Chats(chat_id, lang) 
+                VALUES (?, ?)
+                ON CONFLICT(chat_id) DO UPDATE 
+                SET lang = excluded.lang;
+            ''', (chat_id, language_code))
+    except sqlite3.Error as e:
+        logger.error(f"Error in register_new_chat_id: {e}")
+        raise
+    finally:
+        conn.close()
 
 
 @logger.catch
 def get_only_chat_participants(chat_id: int) -> List[int]:
+    """Get all participants for a chat with proper SQL parameterization"""
+    if not isinstance(chat_id, int):
+        raise ValueError("chat_id must be an integer")
+        
     conn = reconnect()
-    cur = conn.cursor()
-
-    cur.execute('''
-        SELECT DISTINCT user_id
-        FROM Participants
-        WHERE event_id =
-        (SELECT event_id FROM Events WHERE chat_id = ?)
-        ;''', (chat_id, ))
-    rows = cur.fetchall()
-    conn.close()
-    if not rows:
+    try:
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT DISTINCT user_id
+            FROM Participants
+            WHERE event_id IN 
+            (SELECT event_id FROM Events WHERE chat_id = ?);
+        ''', (chat_id,))
+        return [int(row[0]) for row in cur.fetchall() if row and row[0] is not None]
+    except (ValueError, sqlite3.Error) as e:
+        logger.error(f"Error in get_only_chat_participants: {e}")
         return []
-    user_ids = [int(user_id[0]) for user_id in rows]
-    return user_ids
+    finally:
+        conn.close()
 
 
 @logger.catch
 def get_chat_lang(chat_id: int) -> str:
+    """Get chat language with proper SQL parameterization"""
+    if not isinstance(chat_id, int):
+        raise ValueError("chat_id must be an integer")
+        
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute('SELECT lang FROM Chats WHERE chat_id = ?;', (chat_id,))
-    row = cur.fetchone()
-    conn.close()
-    if not row or not row[0]:
-        logger.info(f'Can not get LANG for this chat_id: {chat_id}')
+    try:
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT lang 
+            FROM Chats 
+            WHERE chat_id = ?;
+        ''', (chat_id,))
+        row = cur.fetchone()
+        if not row or not row[0]:
+            logger.info(f'Can not get LANG for this chat_id: {chat_id}')
+            return 'en'
+        return row[0]
+    except sqlite3.Error as e:
+        logger.error(f"Error in get_chat_lang: {e}")
         return 'en'
-    return row[0]
+    finally:
+        conn.close()
 
 
 @logger.catch
 def set_chat_lang(chat_id: int, lang: str):
+    """Set chat language with proper SQL parameterization"""
+    if not isinstance(chat_id, int) or not isinstance(lang, str):
+        raise ValueError("Invalid parameter types")
+        
     conn = reconnect()
-    conn.execute("Update Chats SET lang = ? WHERE chat_id = ?;", (lang, chat_id,))
-    conn.commit()
-    conn.close()
+    try:
+        with conn:
+            conn.execute('''
+                UPDATE Chats 
+                SET lang = ? 
+                WHERE chat_id = ?;
+            ''', (lang, chat_id))
+    except sqlite3.Error as e:
+        logger.error(f"Error in set_chat_lang: {e}")
+        raise
+    finally:
+        conn.close()
 
 
 def get_event_users(chat_id: int) -> List[int]:
+    """Get users for an event with proper SQL parameterization"""
+    if not isinstance(chat_id, int):
+        raise ValueError("chat_id must be an integer")
+        
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute('SELECT user_id FROM Participants WHERE event_id IN (SELECT event_id FROM Events WHERE status = "Open" AND  chat_id=?) ORDER BY operation_datetime;', (chat_id,))
-    rows = cur.fetchall()
-    conn.close()
-    if not rows:
+    try:
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT user_id 
+            FROM Participants 
+            WHERE event_id IN 
+                (SELECT event_id FROM Events WHERE status = 'Open' AND chat_id = ?) 
+            ORDER BY operation_datetime;
+        ''', (chat_id,))
+        return [row[0] for row in cur.fetchall() if row and row[0] is not None]
+    except (ValueError, sqlite3.Error) as e:
+        logger.error(f"Error in get_event_users: {e}")
         return []
-    users = [row[0] for row in rows if row[0] is not None]
-    return users
+    finally:
+        conn.close()
 
 def get_event_revoked_users(chat_id: int) -> List[int]:
+    """Get revoked users for an event with proper SQL parameterization"""
+    if not isinstance(chat_id, int):
+        raise ValueError("chat_id must be an integer")
+        
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute('SELECT user_id FROM Revoked WHERE event_id IN (SELECT event_id FROM Events WHERE status = "Open" AND  chat_id=?) ORDER BY operation_datetime;', (chat_id,))
-    rows = cur.fetchall()
-    conn.close()
-    if not rows:
+    try:
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT user_id 
+            FROM Revoked 
+            WHERE event_id IN 
+                (SELECT event_id FROM Events WHERE status = 'Open' AND chat_id = ?) 
+            ORDER BY operation_datetime;
+        ''', (chat_id,))
+        return [row[0] for row in cur.fetchall() if row and row[0] is not None]
+    except (ValueError, sqlite3.Error) as e:
+        logger.error(f"Error in get_event_revoked_users: {e}")
         return []
-    users = [row[0] for row in rows if row[0] is not None]
-    return users
+    finally:
+        conn.close()
 
 
 def apply_for_participation_in_the_event(chat_id: int, user_id: int):
+    """Apply for participation in an event with proper SQL parameterization"""
+    if not all(isinstance(x, int) for x in (chat_id, user_id)):
+        raise ValueError("chat_id and user_id must be integers")
+        
     logger.info(f"Event - New player request: {user_id}")
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute("PRAGMA foreign_keys = 1;")
-    dtm = datetime.datetime.now()
-    cur.execute('''
-        INSERT or REPLACE into
-        Participants (event_id, user_id, operation_datetime)
-        values ((SELECT event_id FROM Events WHERE status = "Open" AND chat_id=?), ?, ?);
-        ''', (chat_id, user_id, dtm))
-    cur.execute('''
-        DELETE FROM Revoked
-        WHERE event_id = (SELECT event_id FROM Events WHERE status = "Open" AND chat_id=?) and user_id = ?;
-        ''', (chat_id, user_id,))
-    conn.commit()
-    conn.close()
+    try:
+        with conn:
+            cur = conn.cursor()
+            cur.execute("PRAGMA foreign_keys = 1;")
+            dtm = datetime.datetime.now()
+            
+            # Insert or replace participation
+            cur.execute('''
+                INSERT OR REPLACE INTO Participants (event_id, user_id, operation_datetime)
+                VALUES (
+                    (SELECT event_id FROM Events WHERE status = 'Open' AND chat_id = ?), 
+                    ?, 
+                    ?
+                );
+            ''', (chat_id, user_id, dtm))
+            
+            # Remove from revoked if exists
+            cur.execute('''
+                DELETE FROM Revoked
+                WHERE event_id = (SELECT event_id FROM Events WHERE status = 'Open' AND chat_id = ?) 
+                AND user_id = ?;
+            ''', (chat_id, user_id))
+    except sqlite3.Error as e:
+        logger.error(f"Error in apply_for_participation_in_the_event: {e}")
+        raise
+    finally:
+        conn.close()
 
 
 def revoke_application_for_the_event(chat_id: int, user_id: int):
+    """Revoke application for an event with proper SQL parameterization"""
+    if not all(isinstance(x, int) for x in (chat_id, user_id)):
+        raise ValueError("chat_id and user_id must be integers")
+        
     logger.info(f"Event - Player canceled request: {user_id}")
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute("PRAGMA foreign_keys = 1;")
-    dtm = datetime.datetime.now()
-    cur.execute('''
-        INSERT or REPLACE into
-        Revoked (event_id, user_id, operation_datetime)
-        values ((SELECT event_id FROM Events WHERE status = "Open" AND chat_id=?), ?, ?);
-        ''', (chat_id, user_id, dtm))
-    cur.execute('''
-        DELETE FROM Participants
-        WHERE event_id = (SELECT event_id FROM Events WHERE status = "Open" AND chat_id=?) and user_id = ?;
-        ''', (chat_id, user_id,))
-    conn.commit()
-    conn.close()
+    try:
+        with conn:
+            cur = conn.cursor()
+            cur.execute("PRAGMA foreign_keys = 1;")
+            dtm = datetime.datetime.now()
+            
+            # Add to revoked
+            cur.execute('''
+                INSERT OR REPLACE INTO Revoked (event_id, user_id, operation_datetime)
+                VALUES (
+                    (SELECT event_id FROM Events WHERE status = 'Open' AND chat_id = ?), 
+                    ?, 
+                    ?
+                );
+            ''', (chat_id, user_id, dtm))
+            
+            # Remove from participants
+            cur.execute('''
+                DELETE FROM Participants
+                WHERE event_id = (SELECT event_id FROM Events WHERE status = 'Open' AND chat_id = ?) 
+                AND user_id = ?;
+            ''', (chat_id, user_id))
+    except sqlite3.Error as e:
+        logger.error(f"Error in revoke_application_for_the_event: {e}")
+        raise
 
 
-
-def get_chat_user_rp(chat_id, user_id: int) -> Tuple[int, int]:
-    """Get numbers of registrations and penalties for user in chat"""
+def get_chat_user_rp(chat_id: int, user_id: int) -> Tuple[int, int]:
+    """Get numbers of registrations and penalties for user in chat with proper SQL parameterization"""
+    if not all(isinstance(x, int) for x in (chat_id, user_id)):
+        raise ValueError("chat_id and user_id must be integers")
+        
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute('''
-        SELECT COUNT(*)
-        FROM Participants
-        WHERE event_id in
-        (SELECT event_id FROM Events WHERE status = "Fixed" and chat_id = ?)
-        AND
-        user_id = ?
-        ;''', (chat_id, user_id))
-    rows = cur.fetchall()
-    chat_games = rows[0][0]
-    cur.execute('SELECT COUNT(*) FROM Penalties  WHERE chat_id =? AND user_id = ?;', (chat_id, user_id))
-    rows = cur.fetchall()
-    chat_penalties = rows[0][0]
-    return (chat_games, chat_penalties)
+    try:
+        cur = conn.cursor()
+        
+        # Get registration count
+        cur.execute('''
+            SELECT COUNT(*) 
+            FROM Participants 
+            WHERE event_id IN (SELECT event_id FROM Events WHERE chat_id = ?) 
+            AND user_id = ?;
+        ''', (chat_id, user_id))
+        reg_count = cur.fetchone()[0] or 0
+        
+        # Get penalty count
+        cur.execute('''
+            SELECT COUNT(*) 
+            FROM Penalties 
+            WHERE chat_id = ? 
+            AND user_id = ?;
+        ''', (chat_id, user_id))
+        pen_count = cur.fetchone()[0] or 0
+        
+        return (int(reg_count), int(pen_count))
+    except (ValueError, sqlite3.Error) as e:
+        logger.error(f"Error in get_chat_user_rp: {e}")
+        return (0, 0)
+    finally:
+        conn.close()
 
 
-def get_user_cancellation_datetime(chat_id, canceled_user_id: int) -> str:
+def get_user_cancellation_datetime(chat_id: int, canceled_user_id: int) -> Optional[datetime.datetime]:
+    """Get user's last cancellation datetime with proper SQL parameterization"""
+    if not all(isinstance(x, int) for x in (chat_id, canceled_user_id)):
+        raise ValueError("chat_id and canceled_user_id must be integers")
+        
     conn = reconnect()
-    cur = conn.cursor()
-    cur.execute('''
-        SELECT operation_datetime
-        FROM Revoked
-        WHERE event_id =
-        (SELECT event_id FROM Events WHERE status = "Open"  AND chat_id = ?)
-        AND user_id = ?;''', (chat_id, canceled_user_id))
-    row = cur.fetchone()
-    if not row:
-        logger.error(f'Strange situation for chat_id = {chat_id} and canceled_user_id = {canceled_user_id}')
-        return 'DATETIME NOT FOUND'
-    return row[0]
+    try:
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT operation_datetime 
+            FROM Revoked
+            WHERE event_id = (SELECT event_id FROM Events WHERE status = 'Open' AND chat_id = ?) 
+            AND user_id = ?;
+        ''', (chat_id, canceled_user_id))
+        row = cur.fetchone()
+        if not row or not row[0]:
+            logger.info(f'No cancellation found for user {canceled_user_id} in chat {chat_id}')
+            return None
+        return row[0]
+    except sqlite3.Error as e:
+        logger.error(f"Error in get_user_cancellation_datetime: {e}")
+        return None
+    finally:
+        conn.close()
 
 
 if __name__ == '__main__':
